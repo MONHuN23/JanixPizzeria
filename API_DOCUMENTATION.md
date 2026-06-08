@@ -15,6 +15,10 @@
 - **Topping:** `id`, `name`.
 - **Order:** `id`, `user_id`, `address_id`, `status` (pending, processing, delivered, cancelled).
 
+#### Pivot (Join) Tables
+- **order_pizza:** `order_id`, `pizza_id`, `quantity`, `purchased_price`.
+- **pizza_topping:** `pizza_id`, `topping_id`.
+
 ### Relationships between tables
 - **User (1) - (N) Address:** A user can have multiple addresses. An address belongs to exactly one user.
 - **User (1) - (N) Order:** A user can place multiple orders. An order belongs to exactly one user.
@@ -98,7 +102,6 @@ The application uses **Laravel Sanctum** for token-based authentication.
 ### Prerequisites
 - PHP >= 8.2
 - Composer
-- Node.js & NPM
 - MySQL or SQLite (configured in `.env`)
 
 ### Steps to Install and Run
@@ -110,7 +113,6 @@ The application uses **Laravel Sanctum** for token-based authentication.
 2. **Install dependencies:**
    ```bash
    composer install
-   npm install
    ```
 3. **Environment Setup:**
    ```bash
