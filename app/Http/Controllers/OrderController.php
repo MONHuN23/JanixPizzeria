@@ -139,7 +139,6 @@ class OrderController extends Controller
             ], 422, ['Content-Type' => 'application/json']);
         }
 
-        // Így frissítjük a konkrét oszlopot
         $order->update([
             'status' => $request->status
         ]);

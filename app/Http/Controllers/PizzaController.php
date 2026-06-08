@@ -190,7 +190,6 @@ class PizzaController extends Controller
     {
         $pizza = Pizza::find($id);
 
-        // Ellenőrizzük, hogy van-e pizza, és van-e egyáltalán képe
         if (!$pizza || !$pizza->image) {
             return response()->json([
                 'status' => false,
@@ -199,11 +198,8 @@ class PizzaController extends Controller
             );
         }
 
-        // Mivel az adatbázisban a per-es URL van (pl. "/storage/pizzas/kep.jpg"), 
-        // le kell vágni az elejét, hogy megkapjuk a fizikai fájl elérési útját a "public" lemezen.
         $path = str_replace('/storage/', '', $pizza->image);
 
-        // Ellenőrizzük, hogy a fájl tényleg létezik-e a szerveren
         if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
             return response()->json([
                 'status' => false,
