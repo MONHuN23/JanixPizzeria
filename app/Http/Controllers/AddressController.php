@@ -37,7 +37,12 @@ class AddressController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'address' => 'required|string|max:150',
+            'name' => 'required|string|max:100',
+            'postalcode' => 'nullable|integer',
+            'city' => 'nullable|string|max:100',
+            'streetandnum' => 'required|string|max:150',
+            'floor' => 'nullable|integer',
+            'door' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -50,7 +55,13 @@ class AddressController extends Controller
 
         $address = Address::create([
             'user_id' => $request->user()->id,
-            'address' => $request->address,
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'postalcode' => $request->postalcode ?? 3300,
+            'city' => $request->city ?? 'Eger',
+            'streetandnum' => $request->streetandnum,
+            'floor' => $request->floor,
+            'door' => $request->door,
         ]);
 
         return response()->json([
@@ -111,7 +122,13 @@ class AddressController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'address' => 'required|string|max:150',
+            'name' => 'required|string|max:100',
+            'phone' => 'required|string|max:20',
+            'postalcode' => 'nullable|integer',
+            'city' => 'nullable|string|max:100',
+            'streetandnum' => 'required|string|max:150',
+            'floor' => 'nullable|integer',
+            'door' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
@@ -130,7 +147,13 @@ class AddressController extends Controller
         }
 
         $address->update([
-            'address' => $request->address
+            'name' => $request->name,
+            'phone' => $request->phone,
+            'postalcode' => $request->postalcode ?? 3300,
+            'city' => $request->city ?? 'Eger',
+            'streetandnum' => $request->streetandnum,
+            'floor' => $request->floor,
+            'door' => $request->door,
         ]);
 
         return response()->json([
@@ -158,7 +181,7 @@ class AddressController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => "'{$address->address}', (ID: {$address->id}) Succesfully deleted",
+            'message' => "'{$address->name}', (ID: {$address->id}) Succesfully deleted",
         ], 200, ['Content-Type' => 'application/json']);
     }
     

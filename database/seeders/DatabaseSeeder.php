@@ -27,9 +27,15 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('user123'),
             'is_admin' => false,
         ]);
+        
         Address::factory()->create([
             'user_id' => $tesztElek->id,
-            'address' => '3300 Eger, Eszterházy tér 1.'
+            'name' => 'Otthon',
+            'postalcode' => 3300,
+            'city' => 'Eger',
+            'streetandnum' => 'Eszterházy tér 1.',
+            'floor' => 3,
+            'door' => 1
         ]);
 
         $toppings = Topping::factory(10)->create();

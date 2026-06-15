@@ -36,7 +36,8 @@ class ToppingController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'string|required|min:3|max:35'
+            'name' => 'string|required|min:3|max:35',
+            'price' => 'required|integer|min:0'
         ]);
 
         if ($validator->fails()) {
@@ -48,7 +49,8 @@ class ToppingController extends Controller
         }
 
         $topping = Topping::create([
-            'name' => $request->name
+            'name' => $request->name,
+            'price' => $request->price
         ]);
 
         return response()->json([
@@ -102,7 +104,8 @@ class ToppingController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'string|required|min:3|max:35'
+            'name' => 'string|required|min:3|max:35',
+            'price' => 'required|integer|min:0'
         ]);
 
         if ($validator->fails()) {
@@ -114,7 +117,8 @@ class ToppingController extends Controller
         }
 
         $topping->update([
-            'name' => $request->name
+            'name' => $request->name,
+            'price' => $request->price
         ]);
 
 

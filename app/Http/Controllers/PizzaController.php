@@ -38,7 +38,7 @@ class PizzaController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:150',
-            'description' => 'required|string|max:500',
+            'description' => 'nullable|string|max:500',
             'price' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'toppings' => 'nullable|array',
@@ -125,7 +125,7 @@ class PizzaController extends Controller
 
         $validator = Validator::make($request->all(), [
             'name' => 'string|max:150',
-            'description' => 'string|max:500',
+            'description' => 'nullable|string|max:500',
             'price' => 'integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'toppings' => 'nullable|array',

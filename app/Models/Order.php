@@ -18,6 +18,8 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'address_id',
+        'guest_email',
+        'note',
         'status',
     ];
 

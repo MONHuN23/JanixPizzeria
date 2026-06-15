@@ -18,7 +18,12 @@ class AddressFactory extends Factory
     public function definition(): array
     {
         return [
-            'address' => fake()->address(), // Teljes, formázott kamu lakcím
+            'name' => $this->faker->name(),
+            'postalcode' => $this->faker->numberBetween(1000, 9999),
+            'city' => $this->faker->city(),
+            'streetandnum' => $this->faker->streetAddress(),
+            'floor' => $this->faker->numberBetween(1, 10),
+            'door' => $this->faker->numberBetween(1, 10),
         ];
     }
 }
