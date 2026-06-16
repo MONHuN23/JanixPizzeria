@@ -14,7 +14,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/pizzas', [PizzaController::class, 'index']);
 Route::get('/pizzas/{id}', [PizzaController::class, 'show']);
 Route::get('/toppings', [ToppingController::class, 'index']);
-Route::post('/orders', [OrderController::class, 'store']);
 
 // For logged in users w token
 Route::middleware('auth:sanctum')->group(function () {
@@ -51,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy']);
 
     // ORDER CRUD (only your own except admins can see/destroy your order)
+    Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
     Route::delete('/orders/{id}', [OrderController::class, 'destroy']);

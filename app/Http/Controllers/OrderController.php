@@ -6,10 +6,6 @@ use App\Models\Order;
 use App\Models\Pizza;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OrderPlacedMail;
-use App\Mail\OrderAcceptedMail;
-use App\Mail\OrderDeclinedMail;
 
 class OrderController extends Controller
 {
@@ -19,7 +15,7 @@ class OrderController extends Controller
     public function index(Request $request)
     {
         if($request->user() && $request->user()->is_admin) {
-            $orders = Order::with(['user', 'pizzas', 'address'])->orderBy('created_at', 'desc')->get();
+            $orders = Order::with(['user', 'pizzas'])->get();
         } else {
             $orders = Order::where('user_id', $request->user()->id)
                 ->with('pizzas')->get();
@@ -45,52 +41,12 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $request->user('sanctum');
-        $isGuest = !$user;
-
-        $now = \Carbon\Carbon::now('Europe/Budapest');
-        $day = $now->dayOfWeekIso; // 1 (Mon) - 7 (Sun)
-        $time = $now->format('H:i');
-
-        $isOpen = false;
-        if ($day >= 2 && $day <= 6) { // Tue - Sat
-            if ($time >= '11:00' && $time < '22:00') $isOpen = true;
-        }
-
-        if ($user && $user->is_admin) {
-            $isOpen = true;
-        }
-
-        if (!$isOpen) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Sajnáljuk, éttermünk jelenleg zárva van. Rendelést csak nyitvatartási időben tudunk fogadni.',
-            ], 422, ['Content-Type' => 'application/json']);
-        }
-
-        $rules = [
+        $validator = Validator::make($request->all(), [
+            'address_id' => 'required|integer|exists:addresses,id',
             'pizzas' => 'required|array|min:1',
             'pizzas.*.id' => 'required|integer|exists:pizzas,id',
             'pizzas.*.quantity' => 'required|integer|min:1',
-            'note' => 'nullable|string|max:500',
-        ];
-
-        if ($isGuest) {
-            $rules['guest_email'] = 'required|email|max:150';
-            $rules['address.name'] = 'required|string|max:100';
-            $rules['address.phone'] = 'required|string|max:20';
-            $rules['address.city'] = 'required|string|max:100';
-            $rules['address.streetandnum'] = 'required|string|max:255';
-            $rules['address.postalcode'] = 'nullable|integer';
-            $rules['address.floor'] = 'nullable|integer';
-            $rules['address.door'] = 'nullable|integer';
-        } else {
-            // For logged in users, we can accept address_id OR a new_address
-            // We'll keep it simple: if address_id exists, use it.
-            $rules['address_id'] = 'required|integer|exists:addresses,id';
-        }
-
-        $validator = Validator::make($request->all(), $rules);
+        ]);
 
         if ($validator->fails()) {
             return response()->json([
@@ -100,27 +56,9 @@ class OrderController extends Controller
             ], 422, ['Content-Type' => 'application/json']);
         }
 
-        if ($isGuest) {
-            $address = \App\Models\Address::create([
-                'user_id' => null,
-                'name' => $request->input('address.name'),
-                'phone' => $request->input('address.phone'),
-                'postalcode' => $request->input('address.postalcode') ?? 3300,
-                'city' => $request->input('address.city') ?? 'Eger',
-                'streetandnum' => $request->input('address.streetandnum'),
-                'floor' => $request->input('address.floor'),
-                'door' => $request->input('address.door'),
-            ]);
-            $address_id = $address->id;
-        } else {
-            $address_id = $request->address_id;
-        }
-
         $order = Order::create([
-            'user_id' => $isGuest ? null : $user->id,
-            'address_id' => $address_id,
-            'guest_email' => $isGuest ? $request->guest_email : null,
-            'note' => $request->note,
+            'user_id' => $request->user()->id,
+            'address_id' => $request->address_id,
             'status' => 'pending',
         ]);
 
@@ -133,16 +71,10 @@ class OrderController extends Controller
             ]);
         }
 
-        $order->load('pizzas', 'address');
-        $email = $isGuest ? $request->guest_email : $user->email;
-        if ($email) {
-            Mail::to($email)->send(new OrderPlacedMail($order));
-        }
-
         return response()->json([
             'status' => true,
             'message' => 'Order placed successfully',
-            'data' => $order
+            'data' => $order->load('pizzas')
         ], 201, ['Content-Type' => 'application/json']);
     }
     /**
@@ -207,23 +139,9 @@ class OrderController extends Controller
             ], 422, ['Content-Type' => 'application/json']);
         }
 
-        $oldStatus = $order->status;
-
         $order->update([
             'status' => $request->status
         ]);
-
-        if ($oldStatus !== $request->status) {
-            $order->load(['user', 'address']);
-            $email = $order->guest_email ?? $order->user?->email;
-            if ($email) {
-                if ($request->status === 'processing') {
-                    Mail::to($email)->send(new OrderAcceptedMail($order));
-                } elseif ($request->status === 'cancelled') {
-                    Mail::to($email)->send(new OrderDeclinedMail($order));
-                }
-            }
-        }
 
         return response()->json([
             'status' => true,
@@ -254,7 +172,7 @@ class OrderController extends Controller
             ], 403, ['Content-Type' => 'application/json']);
         }
 
-        $addressString = $order->address->name;
+        $addressString = $order->address->address;
         $orderId = $order->id;
 
         $order->delete();

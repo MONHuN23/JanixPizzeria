@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pizzas', function (Blueprint $table) {
             $table->id();
             $table->string("name");
-            $table->string("description")->nullable();
+            $table->string("description");
             $table->integer("price");
             $table->string('image')->nullable();
             $table->timestamps();
